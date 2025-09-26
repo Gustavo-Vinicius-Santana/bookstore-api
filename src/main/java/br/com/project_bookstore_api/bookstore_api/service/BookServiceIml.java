@@ -29,9 +29,8 @@ public class BookServiceIml implements BookService {
     }
 
     @Override
-    public Book findByName(String name) {
-        return bookRepository.findByTitleContainingIgnoreCase(name)
-                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado pelo titulo."));
+    public Page<Book> findByTitle(String title, Pageable pagination) {
+        return bookRepository.findByTitleContainingIgnoreCase(title, pagination);
     }
 
     @Override
@@ -42,10 +41,9 @@ public class BookServiceIml implements BookService {
     @Transactional
     @Override
     public Book update(UUID id, Book book) {
-        var existing = bookRepository.findById(id)
+        Book existing = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado."));
 
-        // Atualiza apenas os campos necessários
         existing.setTitle(book.getTitle());
         existing.setDescription(book.getDescription());
         existing.setPageCount(book.getPageCount());
@@ -56,9 +54,8 @@ public class BookServiceIml implements BookService {
 
     @Override
     public void deleteId(UUID id) {
-        var existing = bookRepository.findById(id)
+        Book existing = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado."));
-
         bookRepository.delete(existing);
     }
 }

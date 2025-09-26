@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface BookService {
     Page<Book> findAll(Pageable pagination);
     Book findById(UUID id);
-    Book findByName(String name);
+    Page<Book> findByTitle(String title, Pageable pagination);
     Book save(Book book);
     Book update(UUID id, Book book);
     void deleteId(UUID id);

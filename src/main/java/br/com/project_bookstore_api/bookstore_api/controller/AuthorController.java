@@ -16,23 +16,24 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/author")
 @RequiredArgsConstructor
-
 public class AuthorController {
     private final AuthorServiceIml authorServiceIml;
 
     @GetMapping
     public ResponseEntity<Page<Author>> findAll(
-            @PageableDefault(size = 5, sort = {"name"}, direction = Sort.Direction.ASC ) Pageable pagination){
+            @PageableDefault(size = 5, sort = {"name"}, direction = Sort.Direction.ASC) Pageable pagination) {
         return ResponseEntity.ok(authorServiceIml.findAll(pagination));
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<Author> findByName(@PathVariable("name") String name){
-        return ResponseEntity.ok(authorServiceIml.findByName(name));
+    @GetMapping("/nome/{name}")
+    public ResponseEntity<Page<Author>> findByName(
+            @PathVariable("name") String name,
+            @PageableDefault(size = 5) Pageable pagination) {
+        return ResponseEntity.ok(authorServiceIml.findByName(name, pagination));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Author> findById(@PathVariable("id") UUID id){
+    public ResponseEntity<Author> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(authorServiceIml.findById(id));
     }
 
@@ -42,12 +43,12 @@ public class AuthorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Author> update(@PathVariable("id") UUID id, @RequestBody Author author){
+    public ResponseEntity<Author> update(@PathVariable("id") UUID id, @RequestBody Author author) {
         return ResponseEntity.ok(authorServiceIml.update(id, author));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Author> delete(@PathVariable("id") UUID id){
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         authorServiceIml.deleteId(id);
         return ResponseEntity.noContent().build();
     }

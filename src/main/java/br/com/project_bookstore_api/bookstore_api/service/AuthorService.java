@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface AuthorService {
     Page<Author> findAll(Pageable pagination);
     Author findById(UUID id);
-    Author findByName(String name);
+    Page<Author> findByName(String name, Pageable pagination);
     Author save(Author author);
     Author update(UUID id, Author author);
     void deleteId(UUID id);

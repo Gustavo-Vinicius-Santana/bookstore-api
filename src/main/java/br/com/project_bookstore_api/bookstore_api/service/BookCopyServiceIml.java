@@ -1,6 +1,7 @@
 package br.com.project_bookstore_api.bookstore_api.service;
 
 import br.com.project_bookstore_api.bookstore_api.model.BookCopy;
+import br.com.project_bookstore_api.bookstore_api.model.BookStatus;
 import br.com.project_bookstore_api.bookstore_api.repository.BookCopyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -25,13 +26,17 @@ public class BookCopyServiceIml implements BookCopyService {
     @Override
     public BookCopy findById(UUID id) {
         return bookCopyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Copia do livro não encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Cópia do livro não encontrada"));
     }
 
     @Override
-    public BookCopy findByName(String name) {
-        return bookCopyRepository.findByBook_TitleContainingIgnoreCase(name)
-                .orElseThrow(() -> new EntityNotFoundException("Copia do livro não encontrada por esse titulo"));
+    public long countByBookId(UUID bookId) {
+        return bookCopyRepository.countByBookId(bookId);
+    }
+
+    @Override
+    public long countByBookIdAndStatus(UUID bookId, BookStatus status) {
+        return bookCopyRepository.countByBookIdAndBookStatus(bookId, status);
     }
 
     @Override
@@ -42,10 +47,9 @@ public class BookCopyServiceIml implements BookCopyService {
     @Transactional
     @Override
     public BookCopy update(UUID id, BookCopy bookCopy) {
-        var existing = bookCopyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Copia do livro não encontrada"));
+        BookCopy existing = bookCopyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cópia do livro não encontrada"));
 
-        // Atualiza os campos necessários
         existing.setBook(bookCopy.getBook());
         existing.setConditionStatus(bookCopy.getConditionStatus());
         existing.setBookStatus(bookCopy.getBookStatus());
@@ -55,9 +59,8 @@ public class BookCopyServiceIml implements BookCopyService {
 
     @Override
     public void deleteId(UUID id) {
-        var existing = bookCopyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Copia do livro não encontrada"));
-
+        BookCopy existing = bookCopyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cópia do livro não encontrada"));
         bookCopyRepository.delete(existing);
     }
 }

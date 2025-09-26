@@ -1,6 +1,7 @@
 package br.com.project_bookstore_api.bookstore_api.controller;
 
 import br.com.project_bookstore_api.bookstore_api.model.BookCopy;
+import br.com.project_bookstore_api.bookstore_api.model.BookStatus;
 import br.com.project_bookstore_api.bookstore_api.service.BookCopyServiceIml;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,16 @@ public class BookCopyController {
     @GetMapping("/{id}")
     public ResponseEntity<BookCopy> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(bookCopyServiceIml.findById(id));
+    }
+
+    @GetMapping("/quantidade")
+    public ResponseEntity<Long> countByBookAndStatus(
+            @RequestParam UUID bookId,
+            @RequestParam(required = false) BookStatus status) {
+        if (status != null) {
+            return ResponseEntity.ok(bookCopyServiceIml.countByBookIdAndStatus(bookId, status));
+        }
+        return ResponseEntity.ok(bookCopyServiceIml.countByBookId(bookId));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

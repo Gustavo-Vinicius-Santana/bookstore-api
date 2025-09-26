@@ -31,6 +31,13 @@ public class BookController {
         return ResponseEntity.ok(bookServiceIml.findById(id));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<Book>> findByTitle(
+            @RequestParam String title,
+            @PageableDefault(size = 5) Pageable pagination) {
+        return ResponseEntity.ok(bookServiceIml.findByTitle(title, pagination));
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Book> save(@RequestBody Book book) {
         Book savedBook = bookServiceIml.save(book);

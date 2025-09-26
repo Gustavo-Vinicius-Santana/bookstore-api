@@ -24,13 +24,12 @@ public class AuthorServiceIml implements AuthorService {
     @Override
     public Author findById(UUID id) {
         return authorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("autor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Autor não encontrado"));
     }
 
     @Override
-    public Author findByName(String name) {
-        return authorRepository.findByNameContaining(name)
-                .orElseThrow(() -> new EntityNotFoundException("autor não encontrado"));
+    public Page<Author> findByName(String name, Pageable pagination) {
+        return authorRepository.findByNameContaining(name, pagination);
     }
 
     @Override
@@ -41,16 +40,17 @@ public class AuthorServiceIml implements AuthorService {
     @Transactional
     @Override
     public Author update(UUID id, Author author) {
-        var user = authorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("autor não encontrado"));
-        return authorRepository.save(user);
+        Author existingAuthor = authorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Autor não encontrado"));
+
+        existingAuthor.setName(author.getName());
+        return authorRepository.save(existingAuthor);
     }
 
     @Override
     public void deleteId(UUID id) {
-        var user = authorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("autor não encontrado"));
-
-        authorRepository.deleteById(id);
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Autor não encontrado"));
+        authorRepository.delete(author);
     }
 }
