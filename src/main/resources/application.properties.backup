@@ -1,6 +1,6 @@
 spring.application.name=bookstore-api
 
-# ConfiguraÃ§Ã£o do banco de dados
+# Configuração do banco de dados
 spring.datasource.url=jdbc:postgresql://localhost:5433/meubanco
 spring.datasource.username=meuusuario
 spring.datasource.password=minhasenha

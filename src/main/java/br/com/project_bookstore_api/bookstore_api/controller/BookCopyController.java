@@ -1,7 +1,9 @@
 package br.com.project_bookstore_api.bookstore_api.controller;
 
-import br.com.project_bookstore_api.bookstore_api.model.BookCopy;
-import br.com.project_bookstore_api.bookstore_api.service.BookCopyServiceIml;
+import br.com.project_bookstore_api.bookstore_api.dto.BookCopyRequestDTO;
+import br.com.project_bookstore_api.bookstore_api.dto.BookCopyResponseDTO;
+import br.com.project_bookstore_api.bookstore_api.model.BookStatus;
+import br.com.project_bookstore_api.bookstore_api.service.BookCopyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,33 +20,43 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BookCopyController {
 
-    private final BookCopyServiceIml bookCopyServiceIml;
+    private final BookCopyService bookCopyService;
 
     @GetMapping
-    public ResponseEntity<Page<BookCopy>> findAll(
+    public ResponseEntity<Page<BookCopyResponseDTO>> findAll(
             @PageableDefault(size = 5, sort = {"id"}, direction = Sort.Direction.ASC) Pageable pagination) {
-        return ResponseEntity.ok(bookCopyServiceIml.findAll(pagination));
+        return ResponseEntity.ok(bookCopyService.findAll(pagination));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookCopy> findById(@PathVariable("id") UUID id) {
-        return ResponseEntity.ok(bookCopyServiceIml.findById(id));
+    public ResponseEntity<BookCopyResponseDTO> findById(@PathVariable("id") UUID id) {
+        return ResponseEntity.ok(bookCopyService.findById(id));
+    }
+
+    @GetMapping("/quantidade")
+    public ResponseEntity<Long> countByBookAndStatus(
+            @RequestParam UUID bookId,
+            @RequestParam(required = false) BookStatus status) {
+        if (status != null) {
+            return ResponseEntity.ok(bookCopyService.countByBookIdAndStatus(bookId, status));
+        }
+        return ResponseEntity.ok(bookCopyService.countByBookId(bookId));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BookCopy> save(@RequestBody BookCopy bookCopy) {
-        BookCopy savedBookCopy = bookCopyServiceIml.save(bookCopy);
+    public ResponseEntity<BookCopyResponseDTO> save(@RequestBody BookCopyRequestDTO bookCopyRequestDTO) {
+        BookCopyResponseDTO savedBookCopy = bookCopyService.save(bookCopyRequestDTO);
         return ResponseEntity.ok(savedBookCopy);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BookCopy> update(@PathVariable("id") UUID id, @RequestBody BookCopy bookCopy) {
-        return ResponseEntity.ok(bookCopyServiceIml.update(id, bookCopy));
+    public ResponseEntity<BookCopyRequestDTO> update(@PathVariable("id") UUID id, @RequestBody BookCopyRequestDTO bookCopyRequestDTO) {
+        return ResponseEntity.ok(bookCopyService.update(id, bookCopyRequestDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
-        bookCopyServiceIml.deleteId(id);
+        bookCopyService.deleteId(id);
         return ResponseEntity.noContent().build();
     }
 }
