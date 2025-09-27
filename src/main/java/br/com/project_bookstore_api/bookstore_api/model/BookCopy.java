@@ -1,5 +1,6 @@
 package br.com.project_bookstore_api.bookstore_api.model;
 
+import br.com.project_bookstore_api.bookstore_api.dto.BookCopyRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -30,4 +31,11 @@ public class BookCopy {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookStatus bookStatus;
+
+    public static BookCopy fromDto(BookCopyRequestDTO dto) {
+        return BookCopy.builder()
+                .conditionStatus(dto.conditionStatus())
+                .bookStatus(dto.bookStatus())
+                .build();
+    }
 }
