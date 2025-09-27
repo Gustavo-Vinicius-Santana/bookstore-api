@@ -1,8 +1,11 @@
 package br.com.project_bookstore_api.bookstore_api.service;
 
+import br.com.project_bookstore_api.bookstore_api.dto.BookCopyRequestDTO;
+import br.com.project_bookstore_api.bookstore_api.dto.BookCopyResponseDTO;
 import br.com.project_bookstore_api.bookstore_api.model.BookCopy;
 import br.com.project_bookstore_api.bookstore_api.model.BookStatus;
 import br.com.project_bookstore_api.bookstore_api.repository.BookCopyRepository;
+import br.com.project_bookstore_api.bookstore_api.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +20,18 @@ import java.util.UUID;
 public class BookCopyServiceIml implements BookCopyService {
 
     private final BookCopyRepository bookCopyRepository;
+    private final BookRepository bookRepository;
 
     @Override
-    public Page<BookCopy> findAll(Pageable pagination) {
-        return bookCopyRepository.findAll(pagination);
+    public Page<BookCopyResponseDTO> findAll(Pageable pagination) {
+        return bookCopyRepository.findAll(pagination)
+                .map(BookCopyResponseDTO::new);
     }
 
     @Override
-    public BookCopy findById(UUID id) {
+    public BookCopyResponseDTO findById(UUID id) {
         return bookCopyRepository.findById(id)
+                .map(BookCopyResponseDTO::new)
                 .orElseThrow(() -> new EntityNotFoundException("Cópia do livro não encontrada"));
     }
 
@@ -40,21 +46,33 @@ public class BookCopyServiceIml implements BookCopyService {
     }
 
     @Override
-    public BookCopy save(BookCopy bookCopy) {
-        return bookCopyRepository.save(bookCopy);
+    @Transactional
+    public BookCopyResponseDTO save(BookCopyRequestDTO bookCopyRequestDTO) {
+        var book = bookRepository.findById(bookCopyRequestDTO.bookId())
+                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado."));
+
+        var bookCopy = BookCopy.fromDto(bookCopyRequestDTO);
+        bookCopy.setBook(book);
+
+        var savedBookCopy = bookCopyRepository.save(bookCopy);
+
+        return new BookCopyResponseDTO(savedBookCopy);
     }
 
     @Transactional
     @Override
-    public BookCopy update(UUID id, BookCopy bookCopy) {
-        BookCopy existing = bookCopyRepository.findById(id)
+    public BookCopyRequestDTO update(UUID id, BookCopyRequestDTO bookCopyRequestDTO) {
+        var bookCopy = bookCopyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cópia do livro não encontrada"));
 
-        existing.setBook(bookCopy.getBook());
-        existing.setConditionStatus(bookCopy.getConditionStatus());
-        existing.setBookStatus(bookCopy.getBookStatus());
+        var book = bookRepository.findById(bookCopyRequestDTO.bookId())
+                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado."));
 
-        return bookCopyRepository.save(existing);
+        bookCopy.setBook(book);
+        bookCopy.setConditionStatus(bookCopyRequestDTO.conditionStatus());
+        bookCopy.setBookStatus(bookCopyRequestDTO.bookStatus());
+
+        return new BookCopyRequestDTO(bookCopyRepository.save(bookCopy));
     }
 
     @Override
