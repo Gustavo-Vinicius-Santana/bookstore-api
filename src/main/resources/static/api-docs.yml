@@ -1,0 +1,591 @@
+openapi: 3.0.3
+info:
+  title: Bookstore API
+  description: API para gerenciamento de livros, autores, cópias, empréstimos e usuários
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Servidor local
+
+paths:
+
+  /author:
+    get:
+      summary: Listar todos os autores
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Número da página
+        - in: query
+          name: size
+          schema:
+            type: integer
+          description: Tamanho da página
+        - in: query
+          name: sort
+          schema:
+            type: string
+          description: Campo de ordenação
+      responses:
+        '200':
+          description: Lista paginada de autores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorPage'
+
+  /author/{id}:
+    get:
+      summary: Buscar autor por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Autor encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+
+    put:
+      summary: Atualizar autor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '200':
+          description: Autor atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+
+    delete:
+      summary: Deletar autor por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Autor deletado
+
+  /author/nome/{name}:
+    get:
+      summary: Buscar autor por nome
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de autores filtrada pelo nome
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorPage'
+
+  /book:
+    get:
+      summary: Listar todos os livros
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista paginada de livros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponsePage'
+
+    post:
+      summary: Criar novo livro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequestDTO'
+      responses:
+        '200':
+          description: Livro criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponseDTO'
+
+  /book/{id}:
+    get:
+      summary: Buscar livro por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Livro encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponseDTO'
+
+    put:
+      summary: Atualizar livro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequestDTO'
+      responses:
+        '200':
+          description: Livro atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookRequestDTO'
+
+    delete:
+      summary: Deletar livro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Livro deletado
+
+  /book/search/{title}:
+    get:
+      summary: Buscar livros pelo título
+      parameters:
+        - name: title
+          in: path
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de livros filtrada pelo título
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponsePage'
+
+  /bookCopy:
+    get:
+      summary: Listar todas as cópias de livros
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista paginada de cópias de livros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookCopyResponsePage'
+
+  /bookCopy/{id}:
+    get:
+      summary: Buscar cópia por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cópia encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookCopyResponseDTO'
+
+  /bookCopy/quantidade:
+    get:
+      summary: Contar cópias de um livro por status
+      parameters:
+        - in: query
+          name: bookId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quantidade de cópias
+
+  /loans:
+    get:
+      summary: Listar todos os empréstimos
+      responses:
+        '200':
+          description: Lista de empréstimos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanBookResponseDTO'
+
+    post:
+      summary: Criar novo empréstimo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanBookRequestDTO'
+      responses:
+        '201':
+          description: Empréstimo criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanBookResponseDTO'
+
+  /loans/{id}:
+    get:
+      summary: Buscar empréstimo por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Empréstimo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanBookResponseDTO'
+
+    put:
+      summary: Atualizar empréstimo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanBookRequestDTO'
+      responses:
+        '200':
+          description: Empréstimo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanBookResponseDTO'
+
+    delete:
+      summary: Deletar empréstimo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Empréstimo deletado com sucesso
+
+  /loans/search:
+    get:
+      summary: Buscar empréstimos por intervalo de data/hora
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Lista de empréstimos dentro do intervalo informado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanBookResponseDTO'
+
+  /users:
+    get:
+      summary: Listar todos os usuários
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDTO'
+
+    post:
+      summary: Criar usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDTO'
+      responses:
+        '201':
+          description: Usuário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDTO'
+
+components:
+  schemas:
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    AuthorPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    BookRequestDTO:
+      type: object
+      properties:
+        title:
+          type: string
+        authorId:
+          type: string
+          format: uuid
+        price:
+          type: number
+          format: double
+
+    BookResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        authorName:
+          type: string
+        price:
+          type: number
+          format: double
+
+    BookResponsePage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookResponseDTO'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    BookCopyRequestDTO:
+      type: object
+      properties:
+        bookId:
+          type: string
+          format: uuid
+        status:
+          type: string
+
+    BookCopyResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookId:
+          type: string
+          format: uuid
+        status:
+          type: string
+
+    BookCopyResponsePage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookCopyResponseDTO'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    LoanBookRequestDTO:
+      type: object
+      properties:
+        bookCopyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        loanDate:
+          type: string
+          format: date-time
+        returnDate:
+          type: string
+          format: date-time
+
+    LoanBookResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookCopyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        loanDate:
+          type: string
+          format: date-time
+        returnDate:
+          type: string
+          format: date-time
+
+    UserRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    UserResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
